@@ -4,13 +4,24 @@ from sqlalchemy import create_engine
 from urllib.parse import quote
 
 class MySql:
-    def __init__(self, host, user, password, database):
+    """
+    A class for interacting with a MySQL database.
+    Parameters:
+    - host (str): The hostname or IP address of the MySQL server.
+    - user (str): The MySQL user to authenticate as.
+    - password (str): The password to use for authentication.
+    - database (str): The name of the MySQL database to use.
+    """
+    def __init__(self, host: str, user: str, password: str, database: str):
         self.host = host 
         self.user = user 
         self.password = password
         self.database = database
 
     def start_connection(self):
+        """
+        Establishes a connection to the MySQL database.
+        """
         self.connection = mysql.connector.connect(
         host= self.host,
         user= self.user,
@@ -20,10 +31,20 @@ class MySql:
         self.cursor = self.connection.cursor()
 
     def close_connection(self):
-         self.cursor.close()
-         self.connection.close()
+        """
+        Closes the connection to the MySQL database.
+        """
+        self.cursor.close()
+        self.connection.close()
 
-    def select(self, sql_query):
+    def select(self, sql_query: str) ->pd.DataFrame:
+        """
+        Executes a SELECT query and returns the result as a Pandas DataFrame.
+        Parameters:
+        - sql_query (str): The SELECT query to execute.
+        Returns:
+        - pd.DataFrame: Result of the SELECT query in tabular form.
+        """
         try:
             self.start_connection()
             self.cursor.execute(sql_query)
@@ -35,7 +56,12 @@ class MySql:
         finally:
             self.close_connection()
 
-    def show_tables(self):
+    def show_tables(self) -> list:
+        """
+        Retrieves a list of tables in the connected MySQL database.
+        Returns:
+        - list: A list of table names.
+        """
         try:
             self.start_connection()
             self.cursor.execute(f"SHOW TABLES")
@@ -49,7 +75,12 @@ class MySql:
         finally:
             self.close_connection()
 
-    def ddl_operation(self, sql_query):
+    def ddl_operation(self, sql_query: str):
+        """
+        Executes a Data Definition Language (DDL) SQL query.
+        Parameters:
+        - sql_query (str): The DDL SQL query to execute.
+        """
         try:
             self.start_connection()
             self.cursor.execute(sql_query)
@@ -59,7 +90,12 @@ class MySql:
         finally:
             self.close_connection()
 
-    def dml_operation(self, sql_query):
+    def dml_operation(self, sql_query: str):
+        """
+        Executes a Data Manipulation Language (DML) SQL query.
+        Parameters:
+        - sql_query (str): The DML SQL query to execute.
+        """
         try:
             self.start_connection()
             self.cursor.execute(sql_query)
@@ -71,6 +107,12 @@ class MySql:
             self.close_connection()
 
     def insert_df(self, data_frame: pd.DataFrame, table_name: str):
+        """
+        Inserts a Pandas DataFrame into a specified MySQL table.
+        Parameters:
+        - data_frame (pd.DataFrame): The DataFrame to be inserted.
+        - table_name (str): The name of the target MySQL table.
+        """
         try:
             string_connection= f"mysql+mysqlconnector://{self.user}:{quote(self.password)}@{self.host}:3306/{self.database}"
             engine = create_engine(string_connection,  connect_args={'connect_timeout': 120})
