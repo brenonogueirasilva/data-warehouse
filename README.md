@@ -18,31 +18,34 @@ Para a transformação dos dados e consolidação das tabelas dimensionais no Bi
 - **Terraform:** Ferramenta que possibilita a provisionamento eficiente de toda a infraestrutura necessária, seguindo a metodologia de infraestrutura como código (IaC). 
   
 <p align="left">
-<img src="/img/MongoDB-Logo.jpg" alt="mongoDB" height="50" /> 
-<img src="/img/cloud-run.png" alt="cloud-run" height="50" /> 
-<img src="/img/fast-api.png" alt="fastapi" height="50"/> 
-<img src="/img/Google-Compute-Engine.png" alt="google-compute-engine" height="50"/> 
+<img src="/img/cloud-sql.png" alt="cloud_sql" height="50" /> 
+<img src="/img/mysql-logo.png" alt="mysql" height="50" /> 
 <img src="/img/python-logo.png" alt="python" height="50"/> 
-<img src="/img/secret-manager.png" alt="secret-manager" height="50"/> 
+<img src="/img/cloud-function.png" alt="cloud_functions" height="50"/> 
+<img src="/img/cloud-scheduler-2.png" alt="cloud-scheduler" height="50"/> 
+<img src="/img/dbt-logo.png" alt="dbt" height="50"/> 
+<img src="/img/google-bigquery-logo-1.jpg" alt="bigquery" height="50"/> 
 <img src="/img/terraform.png" alt="terraform" height="50"/> 
-<img src="/img/docker-logo.png" alt="docker" height="50"/> 
 </p>
 
 ## Arquitetura do projeto
 
-![Diagrama de Arquiteura do Projeto API NoSql](img/arquitetura_api_nosql.png)
+![Diagrama de Arquiteura de DataWarehouse](img/arquitetura_data_warehouse.png)
 
 ## Etapas do Projeto
 ### 1. Ingestão dos dados no banco de dados relacional
 Como fonte de dados para o projeto será utilizado dados públicos disponíveis no Kaggle do Olist (https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce), famosa plataforma de ecommerce brasileira. Os dados estão distribuídos através de inúmeras tabelas e por se tratarem de dados transacionais estão modelados através de entidade relacionamento (OLAP), abaixo é possível visualizar o relacionamento entre as tabelas.
-Foto
-Como etapa inicial do projeto será necessário criar todas estas tabelas no banco de dados Mysql,  lembrando de definir as restrições entre as tabelas, criando as chaves primários e estrangeiras e respeitando o modelo entidade relacionamento. Com as tabelas criadas no banco, basta ler os arquivos CSV disponiveis no kaggle e ingerir tais dados no banco, tal ação foi feita a partir do script data_ingestion (caminho do arquivo).
+
+![Modelagem Entidade Relacionamento](img/modelagem_1.png)
+
+Como etapa inicial do projeto será necessário criar todas estas tabelas no banco de dados Mysql,  lembrando de definir as restrições entre as tabelas, criando as chaves primários e estrangeiras e respeitando o modelo entidade relacionamento. Com as tabelas criadas no banco, basta ler os arquivos CSV disponiveis no kaggle e ingerir tais dados no banco, tal ação foi feita a partir do script data_ingestion [data-ingestion.py](/cloud_function/src/data_ingestion.py).
 
 ### 2. Definição do Modelo Dimensional
 Com as tabelas já ingeridas no banco de dados Mysql, como forma de simular a origem de um banco de  produção, agora é o momento de estudo da tabela de um ponto de vista de negócio, buscando entender cada uma das colunas identificando quais são as informações podem agregar valor ao negócio, especialmente aquelas que são pertinentes para a extração de insights por meio de relatórios. 
 
 Após a análise da tabela e a identificação das informações relevantes para o negócio, é hora de elaborar o modelo dimensional da tabela. Esse processo envolve a definição das dimensões, como datas, cidades e categorias de produtos, e dos fatos, que incluem informações como contagem de vendas e valor vendido. O resultado desse processo é um modelo dimensional orientado para um esquema de estrela, que pode ser visto abaixo:
-Foto
+
+![Modelagem Dimensional](img/modelagem_2.png)
 
 ### 3. Criação da conexão para as consultas federadas
 Considerando que o banco de produção está no Cloud SQL e o Data Warehouse está no BigQuery, será necessário criar uma conexão dentro do BigQuery com o Cloud SQL. Isso será possível por meio de consultas federadas, permitindo que consultas dentro do BigQuery sejam realizadas no Cloud SQL. As consultas do DBT também serão federadas, funcionando como transformações e extrações simultâneas, sem a necessidade de criar pipelines externos para mover os dados. 
@@ -67,7 +70,7 @@ Para execução do codigo é necessário possuir terraform instalado na máquina
 ## Executando o projeto
 1. Copie o diretório do projeto para uma pasta local em seu computador.
 2. Abra o terminal do seu computador e mova até o diretório do projeto.
-3. Crie uma conta de serviço no GCP com as credenciais para todos os serviços mencionados, baixe uma chave em um arquivo json e coloque o arquivo no diretório raiz com nome `apt-theme-402300-32506a51a70d`.
+3. Crie uma conta de serviço no GCP com as credenciais para todos os serviços mencionados, baixe uma chave em um arquivo json e coloque o arquivo no diretório raiz com nome `creds.json`.
 4. Execute o comando: `terraform init`.
 5. Execute o comando: `terraform plan`.
 6. Execute o comando: `terraform apply`.
